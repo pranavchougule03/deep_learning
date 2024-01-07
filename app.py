@@ -10,13 +10,18 @@ model = load_model('first_prediction_model.keras')
 
 app = Flask(__name__)
 
+@app.route('/')
+def hello_world():
+ return 'Hello World!'
+
 @app.route('/ocr', methods=['POST'])
 def extract_text():
     image_data = request.files['image'].read()
 
     image = Image.open(io.BytesIO(image_data))
     image = np.array(image)
-    print(image.shape)
+    if(len(image.shape)==2): #if image is grayscale
+        image = np.stack((image,)*3, axis=-1)
     extracted_text = decode.extract_text(image,model)
     print(extracted_text)
     return jsonify({'text': extracted_text}), 200
